@@ -7,13 +7,14 @@ env/
 .env
 
 # Databases and Models
-*.db
-*.sqlite3
-*.pkl
-*.model
-*.h5
-*.pth
-*.onnx
+**/*.db
+**/*.sqlite3
+**/*.pkl
+**/*.model
+**/*.h5
+**/*.pth
+**/*.onnx
+backend/data/
 
 # Data and Logs
 *.csv
@@ -41,10 +42,12 @@ dist/
 build/
 .DS_Store
 
-# IDE and Scratch
+# IDE, Scratch, and Backups
 .vscode/
 tmp/
 scratch/
+**/*.bak
+**/*.backup
 *_debug.py
 check_*.py
 test_*.py

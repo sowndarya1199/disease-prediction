@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+scikit-learn
+pandas
+numpy
+joblib
+python-multipart
+pytesseract
+Pillow
+pdf2image
+python-jose[cryptography]
+passlib[argon2]
+fpdf2
+requests

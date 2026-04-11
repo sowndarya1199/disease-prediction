@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>medpred</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script>
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+      var div = document.createElement('div');
+      div.style.color = 'red';
+      div.style.position = 'fixed';
+      div.style.top = '0';
+      div.style.left = '0';
+      div.style.zIndex = '9999';
+      div.style.background = 'white';
+      div.style.padding = '20px';
+      div.innerText = 'Error: ' + msg + '\nAt: ' + url + ':' + lineNo;
+      document.body.appendChild(div);
+      return false;
+    };
+  </script>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>
