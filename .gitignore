@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Databases and Models
+*.db
+*.sqlite3
+*.pkl
+*.model
+*.h5
+*.pth
+*.onnx
+
+# Data and Logs
+*.csv
+*.log
+error.txt
+ocr_debug.txt
+test_output.txt
+test_output_2.txt
+engine_debug.txt
+debug_ocr.txt
+
+# Media and Reports
+*.png
+*.jpg
+*.jpeg
+*.pdf
+real_lab_reports/
+renamed_reports/
+test_reports/
+uploads/
+
+# Node.js (Root or Frontend)
+node_modules/
+dist/
+build/
+.DS_Store
+
+# IDE and Scratch
+.vscode/
+tmp/
+scratch/
+*_debug.py
+check_*.py
+test_*.py
+verify_*.py
+inspect_*.py
+repro_*.py
+compare_dbs.py
+create_admin.py
+create_users.py
+list_patients.py
+migrate_*.py
+update_*.py
+split_pdfs.py
+generate_mapping.py
+extract_full_dataset.py
+ramesh_kumar_report.png
+algorithm_diagram.html
+database_schema_diagram.png
+all_feature_names.txt
+patient_full_dataset.csv
