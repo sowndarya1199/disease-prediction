@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 
 interface Patient { id: number; name: string; approval_status: string; }
@@ -10,7 +11,7 @@ const HealthReportView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('http://127.0.0.1:8000/patients/')
+        fetch('${API_BASE}/patients/')
             .then(r => r.ok ? r.json() : [])
             .then((data: Patient[]) => {
                 const verifiedPatients = data.filter(p => p.approval_status === 'Approved' || p.approval_status === 'Modified');
@@ -23,7 +24,7 @@ const HealthReportView: React.FC = () => {
         if (selectedPatientId) {
             setLoading(true);
             setReportData(null);
-            fetch(`http://127.0.0.1:8000/patients/${selectedPatientId}/predict`, { method: 'POST' })
+            fetch(`${API_BASE}/patients/${selectedPatientId}/predict`, { method: 'POST' })
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     setReportData(data);
@@ -44,19 +45,19 @@ const HealthReportView: React.FC = () => {
         color: 'var(--gray-800)',
     };
 
-    const downloadUrl = selectedPatientId ? `http://127.0.0.1:8000/patients/${selectedPatientId}/download-health-report` : '';
+    const downloadUrl = selectedPatientId ? `${API_BASE}/patients/${selectedPatientId}/download-health-report` : '';
 
     return (
         <div className="p-6 md:p-8" style={{ background: 'linear-gradient(135deg,#eff6ff,#dbeafe,#eff6ff)', minHeight: '100vh' }}>
             <div className="max-w-6xl mx-auto space-y-6 h-full flex flex-col">
 
-                {/* Header */}
+                
                 <div>
                     <h1 className="text-3xl font-black" style={{ color: '#1e3a8a' }}>📄 Health Report</h1>
                     <p className="text-sm" style={{ color: 'var(--gray-500)' }}>View and download the clinically verified comprehensive health report</p>
                 </div>
 
-                {/* Controls */}
+               
                 <div className="glass rounded-2xl p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
                         <div className="lg:col-span-2">
@@ -190,3 +191,4 @@ const HealthReportView: React.FC = () => {
 };
 
 export default HealthReportView;
+

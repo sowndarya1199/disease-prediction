@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState } from 'react';
 
 const StaffRegistration: React.FC = () => {
@@ -48,7 +49,7 @@ const StaffRegistration: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/register', {
+            const response = await fetch('${API_BASE}/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, role }),
@@ -297,3 +298,4 @@ const StaffRegistration: React.FC = () => {
 };
 
 export default StaffRegistration;
+

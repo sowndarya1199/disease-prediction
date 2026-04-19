@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 
 interface ContributionFactor {
@@ -132,7 +133,7 @@ const PredictionView: React.FC<PredictionViewProps> = ({ initialPatientId, userR
     const fetchAIRecommendedDiet = async () => {
         if (!selectedPatientId) return;
         try {
-            const res = await fetch(`http://127.0.0.1:8000/patients/${selectedPatientId}/diet-recommendation`);
+            const res = await fetch(`${API_BASE}/patients/${selectedPatientId}/diet-recommendation`);
             if (res.ok) {
                 const dietData = await res.json();
                 setValidation(prev => ({ ...prev, dietPlan: dietData }));
@@ -232,7 +233,7 @@ const PredictionView: React.FC<PredictionViewProps> = ({ initialPatientId, userR
     const fetchPatientStatus = async () => {
         if (!selectedPatientId) return;
         try {
-            const res = await fetch(`http://127.0.0.1:8000/patients/${selectedPatientId}`);
+            const res = await fetch(`${API_BASE}/patients/${selectedPatientId}`);
             if (res.ok) {
                 const data = await res.json();
                 setPatientStatus(data.approval_status);
@@ -260,7 +261,7 @@ const PredictionView: React.FC<PredictionViewProps> = ({ initialPatientId, userR
         console.log("Submitting Validation with Signature Path:", validation.signaturePath);
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/patients/${selectedPatientId}/validation`, {
+            const response = await fetch(`${API_BASE}/patients/${selectedPatientId}/validation`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -309,7 +310,7 @@ const PredictionView: React.FC<PredictionViewProps> = ({ initialPatientId, userR
         formData.append('file', file);
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/signatures/upload', {
+            const res = await fetch('${API_BASE}/signatures/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -421,7 +422,7 @@ const PredictionView: React.FC<PredictionViewProps> = ({ initialPatientId, userR
                                                     <PhysicianApprovalBadge status={patientStatus} />
                                                     {(patientStatus === 'Approved' || patientStatus === 'Modified') && (
                                                         <a
-                                                            href={`http://127.0.0.1:8000/patients/${selectedPatientId}/download-health-report`}
+                                                            href={`${API_BASE}/patients/${selectedPatientId}/download-health-report`}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-900/20 border border-slate-700 hover:scale-105 active:scale-95 transition-all"
@@ -721,7 +722,7 @@ const PredictionView: React.FC<PredictionViewProps> = ({ initialPatientId, userR
                                                         </label>
                                                         {validation.signaturePath && (
                                                             <div className="w-16 h-12 bg-white rounded-xl border border-indigo-100 flex items-center justify-center p-1 overflow-hidden">
-                                                                <img src={`http://127.0.0.1:8000${validation.signaturePath.replace(/\\/g, '/').split('backend')[1]}`} alt="Preview" className="max-w-full max-h-full object-contain" />
+                                                                <img src={`${API_BASE}${validation.signaturePath.replace(/\\/g, '/').split('backend')[1]}`} alt="Preview" className="max-w-full max-h-full object-contain" />
                                                             </div>
                                                         )}
                                                     </div>
@@ -776,3 +777,4 @@ const PredictionView: React.FC<PredictionViewProps> = ({ initialPatientId, userR
 };
 
 export default PredictionView;
+

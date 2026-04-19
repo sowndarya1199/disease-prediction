@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 import DietReviewDetail from './DietReviewDetail';
 
@@ -21,7 +22,7 @@ const DietReviewCenter: React.FC<DietReviewCenterProps> = ({ initialPatientId })
 
     const fetchPatients = async () => {
         try {
-            const res = await fetch('http://127.0.0.1:8000/patients/');
+            const res = await fetch('${API_BASE}/patients/');
             if (res.ok) {
                 const allPatients = await res.json();
                 // Show patients who have a diagnostic status (Approved/Modified) as they likely need a diet plan
@@ -145,3 +146,4 @@ const DietReviewCenter: React.FC<DietReviewCenterProps> = ({ initialPatientId })
 };
 
 export default DietReviewCenter;
+

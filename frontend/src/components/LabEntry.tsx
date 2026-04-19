@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 
 interface Patient {
@@ -27,7 +28,7 @@ const LabEntry: React.FC = () => {
     useEffect(() => {
         const fetchPatients = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/patients/');
+                const response = await fetch('${API_BASE}/patients/');
                 if (response.ok) {
                     const data = await response.json();
                     setPatients(data);
@@ -48,7 +49,7 @@ const LabEntry: React.FC = () => {
             }
 
             try {
-                const response = await fetch(`http://127.0.0.1:8000/labs/${selectedPatientId}`);
+                const response = await fetch(`${API_BASE}/labs/${selectedPatientId}`);
                 if (response.ok) {
                     const data = await response.json();
                     setRecentResults(data);
@@ -74,7 +75,7 @@ const LabEntry: React.FC = () => {
         formData.append('patient_id', selectedPatientId.toString());
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/labs/upload', {
+            const response = await fetch('${API_BASE}/labs/upload', {
                 method: 'POST',
                 body: formData,
             });
@@ -89,7 +90,7 @@ const LabEntry: React.FC = () => {
                     setMessage({ text: data.message || 'Report processed successfully!', type: 'success' });
                 }
                 // Refresh list
-                const resultsResponse = await fetch(`http://127.0.0.1:8000/labs/${selectedPatientId}`);
+                const resultsResponse = await fetch(`${API_BASE}/labs/${selectedPatientId}`);
                 if (resultsResponse.ok) {
                     const newData = await resultsResponse.json();
                     setRecentResults(newData);
@@ -134,7 +135,7 @@ const LabEntry: React.FC = () => {
         if (!window.confirm('🗑️ Are you sure you want to delete this lab entry?')) return;
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/labs/${resultId}`, {
+            const response = await fetch(`${API_BASE}/labs/${resultId}`, {
                 method: 'DELETE'
             });
 
@@ -171,7 +172,7 @@ const LabEntry: React.FC = () => {
         if (!window.confirm(`🗑️ Are you sure you want to delete ${selectedIds.length} items?`)) return;
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/labs/delete-batch', {
+            const response = await fetch('${API_BASE}/labs/delete-batch', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selectedIds)
@@ -449,3 +450,4 @@ const LabEntry: React.FC = () => {
 };
 
 export default LabEntry;
+

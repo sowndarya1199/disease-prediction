@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useEffect, useState, useRef } from 'react';
 
 interface Patient {
@@ -34,7 +35,7 @@ const PatientList: React.FC<PatientListProps> = ({ onNavigateToPrediction }) => 
 
     const fetchPatients = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/patients/');
+            const response = await fetch('${API_BASE}/patients/');
             if (response.ok) {
                 const data = await response.json();
                 setPatients(data);
@@ -140,7 +141,7 @@ const PatientList: React.FC<PatientListProps> = ({ onNavigateToPrediction }) => 
         }
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/patients/${patientId}`, {
+            const response = await fetch(`${API_BASE}/patients/${patientId}`, {
                 method: 'DELETE'
             });
 
@@ -612,7 +613,7 @@ const PatientList: React.FC<PatientListProps> = ({ onNavigateToPrediction }) => 
                                             </button>
                                             {(patient.approval_status === 'Approved' || patient.approval_status === 'Modified') && (
                                                 <a
-                                                    href={`http://127.0.0.1:8000/patients/${patient.id}/download-health-report`}
+                                                    href={`${API_BASE}/patients/${patient.id}/download-health-report`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => e.stopPropagation()}
@@ -679,3 +680,4 @@ const PatientList: React.FC<PatientListProps> = ({ onNavigateToPrediction }) => 
 };
 
 export default PatientList;
+

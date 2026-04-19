@@ -124,15 +124,34 @@ def predict_disease(feature_data: dict) -> dict:
     
     # HEART DISEASE TRIAGE (ULTIMATE PRIORITY)
     troponin = feature_data.get("troponin", 0.0)
-    if troponin > 0.04 or "heart disease" in str(detected_diagnoses).lower() or "ischemia" in str(detected_diagnoses).lower():
+    hscrp = feature_data.get("hscrp", 0.0)
+    lp_a = feature_data.get("lipoprotein_a", 0.0)
+    ldl_small = feature_data.get("ldl_small", 0.0)
+    
+    is_heart_risk = (
+        troponin > 0.04 or 
+        hscrp > 3.0 or 
+        lp_a > 30 or 
+        ldl_small > 162 or
+        "heart disease" in str(detected_diagnoses).lower() or 
+        "ischemia" in str(detected_diagnoses).lower() or
+        "cardiovascular" in str(detected_diagnoses).lower()
+    )
+
+    if is_heart_risk:
         predicted_disease = "Heart Disease Risk"
-        confidence = 0.98 if troponin > 0.1 else 0.95
+        # Calibrate confidence based on severity
+        if troponin > 0.1 or (hscrp > 4.0 and ldl_small > 200):
+            confidence = 0.98
+        else:
+            confidence = 0.95
+            
         return {
             "disease": predicted_disease,
             "probability": confidence,
             "risk": "High",
             "all_probabilities": {predicted_disease: confidence},
-            "prediction_method": "cardiac_emergency_triage"
+            "prediction_method": "cardiovascular_risk_assessment"
         }
 
     # HYPERTENSION TRIAGE (PRIORITY 1)
@@ -431,11 +450,26 @@ def predict_with_explanation(feature_data: dict, target_disease: str = None) -> 
         add_if_relevant("Low TSH", 40, f"suppressed pituitary response ({tsh} mIU/L) suggesting thyroid overactivity",
                         ["Hyperthyroidism", "Thyroid"])
     
-    # LIPIDS
+    # LIPIDS / CARDIO IQ
     if ldl > 160:
         add_if_relevant("High LDL", 35, f"elevated 'bad' cholesterol ({ldl} mg/dL) posing arterial risks",
                         ["Heart", "Cardio", "Hyperlipidemia"])
     
+    ldl_small = feature_data.get("ldl_small", 0)
+    if ldl_small > 162:
+        add_if_relevant("Small Dense LDL", 45, f"Highly atherogenic small LDL particles ({ldl_small} nmol/L) that easily penetrate arterial walls.",
+                        ["Heart", "Cardio", "Atherosclerosis"])
+
+    lp_a = feature_data.get("lipoprotein_a", 0)
+    if lp_a > 30:
+        add_if_relevant("Lipoprotein(a)", 40, f"Elevated Lp(a) level ({lp_a}) which is an independent genetic risk factor for cardiovascular disease.",
+                        ["Heart", "Cardio"])
+
+    hscrp = feature_data.get("hscrp", 0.0)
+    if hscrp > 3.0:
+        add_if_relevant("High HS-CRP", 45, f"High-sensitivity C-reactive protein ({hscrp} mg/L) indicates chronic vascular inflammation and high cardiac risk.",
+                        ["Heart", "Cardio"])
+
     if triglycerides > 200:
         add_if_relevant("High Triglycerides", 30, f"elevated blood fats ({triglycerides} mg/dL) linked to metabolic risk",
                         ["Metabolic", "Heart", "Diabetes", "Hyperlipidemia"])

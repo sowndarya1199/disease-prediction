@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState } from 'react';
 
 interface LoginProps {
@@ -96,7 +97,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
         try {
             if (mode === 'register') {
-                const registerResponse = await fetch('http://127.0.0.1:8000/register', {
+                const registerResponse = await fetch('${API_BASE}/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, role: selectedRole }),
@@ -112,7 +113,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             formData.append('username', username);
             formData.append('password', password);
 
-            const response = await fetch('http://127.0.0.1:8000/token', {
+            const response = await fetch('${API_BASE}/token', {
                 method: 'POST',
                 body: formData,
             });
@@ -636,3 +637,4 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 };
 
 export default Login;
+

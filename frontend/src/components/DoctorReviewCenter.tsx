@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 import PredictionView from './PredictionView';
 
@@ -25,7 +26,7 @@ const DoctorReviewCenter: React.FC<DoctorReviewCenterProps> = ({ initialPatientI
 
     const fetchPendingQueue = async () => {
         try {
-            const res = await fetch('http://127.0.0.1:8000/patients/');
+            const res = await fetch('${API_BASE}/patients/');
             if (res.ok) {
                 const allPatients = await res.json();
                 const pending = allPatients.filter((p: any) =>
@@ -61,7 +62,7 @@ const DoctorReviewCenter: React.FC<DoctorReviewCenterProps> = ({ initialPatientI
         setAnalysisResult(null);
 
         try {
-            const res = await fetch(`http://127.0.0.1:8000/patients/${patient.id}/predict`, { method: 'POST' });
+            const res = await fetch(`${API_BASE}/patients/${patient.id}/predict`, { method: 'POST' });
             if (res.ok) {
                 const data = await res.json();
                 setAnalysisResult(data);
@@ -216,3 +217,4 @@ const DoctorReviewCenter: React.FC<DoctorReviewCenterProps> = ({ initialPatientI
 };
 
 export default DoctorReviewCenter;
+

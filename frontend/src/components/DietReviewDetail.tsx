@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 
 interface DietReviewDetailProps {
@@ -22,12 +23,12 @@ const DietReviewDetail: React.FC<DietReviewDetailProps> = ({ patientId }) => {
             setLoading(true);
             try {
                 // First get the patient's current diet recommendation
-                const dietRes = await fetch(`http://127.0.0.1:8000/patients/${patientId}/diet-recommendation`);
+                const dietRes = await fetch(`${API_BASE}/patients/${patientId}/diet-recommendation`);
                 if (dietRes.ok) {
                     const dietData = await dietRes.json();
                     
                     // Also check if there's an existing validation for this patient to pre-fill the signature and observations
-                    const patientRes = await fetch(`http://127.0.0.1:8000/patients/${patientId}`);
+                    const patientRes = await fetch(`${API_BASE}/patients/${patientId}`);
                     if (patientRes.ok) {
                         await patientRes.json();
                         // You might want to fetch the actual last validation record here if possible
@@ -54,7 +55,7 @@ const DietReviewDetail: React.FC<DietReviewDetailProps> = ({ patientId }) => {
     const handleSave = async (isDraft = false) => {
         setSubmitting(true);
         try {
-            const response = await fetch(`http://127.0.0.1:8000/patients/${patientId}/validation`, {
+            const response = await fetch(`${API_BASE}/patients/${patientId}/validation`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -333,3 +334,4 @@ const DietReviewDetail: React.FC<DietReviewDetailProps> = ({ patientId }) => {
 };
 
 export default DietReviewDetail;
+

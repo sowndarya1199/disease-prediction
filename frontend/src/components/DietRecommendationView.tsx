@@ -1,3 +1,4 @@
+import { API_BASE } from '../config';
 import React, { useState, useEffect } from 'react';
 
 interface Patient { id: number; name: string; }
@@ -141,7 +142,7 @@ const DietRecommendationView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('http://127.0.0.1:8000/patients/')
+        fetch('${API_BASE}/patients/')
             .then(r => r.ok ? r.json() : [])
             .then(setPatients)
             .catch(() => {});
@@ -161,7 +162,7 @@ const DietRecommendationView: React.FC = () => {
             });
 
             const res = await fetch(
-                `http://127.0.0.1:8000/patients/${selectedPatientId}/finalized-diet?${params}`
+                `${API_BASE}/patients/${selectedPatientId}/finalized-diet?${params}`
             );
             if (res.ok) {
                 setResult(await res.json());
@@ -298,7 +299,7 @@ const DietRecommendationView: React.FC = () => {
                                     <div className="flex items-center gap-4 shrink-0">
                                         {result.is_finalized && (
                                             <button
-                                                onClick={() => window.open(`http://127.0.0.1:8000/patients/${selectedPatientId}/download-diet-pdf?preference=${foodPreference}`, '_blank')}
+                                                onClick={() => window.open(`${API_BASE}/patients/${selectedPatientId}/download-diet-pdf?preference=${foodPreference}`, '_blank')}
                                                 className="px-5 py-2.5 bg-white text-slate-900 rounded-xl font-black text-[10px] uppercase tracking-widest shadow border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2"
                                             >
                                                 ⬇ Download PDF
@@ -461,3 +462,4 @@ const DietRecommendationView: React.FC = () => {
 };
 
 export default DietRecommendationView;
+

@@ -411,6 +411,18 @@ LAB_TEST_PATTERNS = {
         'unit': 'Ratio',
         'normal_range': '0.0-3.5'
     },
+    'ldl_small': {
+        'patterns': [r'ldl\s*small[:\s\-\|]*(\d+\.?\d*)'],
+        'keywords': ['ldl small', 'small ldl', 'small dense ldl'],
+        'unit': 'nmol/L',
+        'normal_range': '0-162'
+    },
+    'ldl_medium': {
+        'patterns': [r'ldl\s*medium[:\s\-\|]*(\d+\.?\d*)'],
+        'keywords': ['ldl medium', 'medium ldl'],
+        'unit': 'nmol/L',
+        'normal_range': '0-201'
+    },
 
     
     'magnesium': {

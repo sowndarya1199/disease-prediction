@@ -9,6 +9,7 @@ import shutil
 import uuid
 import os
 import json
+from sqlalchemy import func
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UPLOAD_DIR = os.path.join(BASE_DIR, "backend", "uploads", "lab_reports")
@@ -135,14 +136,13 @@ def process_symptoms(data: dict):
                     "vomiting", "cold", "flu", "chest pain", "breathing", "weakness", "swelling",
                     "infection", "bleeding", "seizure", "sore throat", "runny nose"]
     
-    # Logic: If symptoms_list is provided, consider all of them as "found"
-    # This ensures custom user-entered symptoms are not ignored.
+    
     if symptoms_list:
         found_symptoms = [s.lower() for s in symptoms_list]
     else:
         found_symptoms = [word for word in all_keywords if word in text]
     
-    # Base severity configuration
+    
     severity_level = "Low"
     severity_score = 3
     
@@ -202,18 +202,17 @@ def search_symptoms(q: str = "", limit: int = 10):
 @app.post("/symptoms/", response_model=schemas.Symptom)
 def create_symptom(log: schemas.SymptomCreate, db: Session = Depends(database.get_db)):
     import json
-    # Use the same list of symptoms for processing
+    
     all_keywords = ["fever", "cough", "headache", "pain", "nausea", "fatigue", "dizziness", 
                     "vomiting", "cold", "flu", "chest pain", "breathing", "weakness", "swelling",
                     "infection", "bleeding", "seizure", "sore throat", "runny nose"]
     
-    # Process original raw text to find matched keywords
+   
     raw_lower = log.raw_text.lower()
-    # If the raw text is a comma-separated list of symptoms, we can split it
-    # to ensure each is preserved in the processed_data JSON
+    
     provided_symptoms = [s.strip().lower() for s in log.raw_text.split(",") if s.strip()]
     
-    # Combine provided symptoms with any keywords found in the text for robust matching
+    
     found_symptoms = list(set(provided_symptoms + [word for word in all_keywords if word in raw_lower]))
     processed_json = json.dumps(found_symptoms)
     
@@ -411,13 +410,13 @@ def predict_patient_disease(patient_id: int, db: Session = Depends(database.get_
         if "clean_explanation" not in result["explanation"]:
             result["explanation"]["clean_explanation"] = {}
             
-        # Only override AI summary and clear factors IF the doctor chose to modify the case
+       
         if db_validation.decision == 'Modify Diagnosis':
             result["explanation"]["summary"] = f"Modified by physician. Clinical Findings: {db_validation.observations or 'None recorded.'}"
             result["explanation"]["clean_explanation"]["key_reason"] = db_validation.observations or "This case was clinically modified by a medical professional."
             result["explanation"]["clean_explanation"]["factors"] = []
         else:
-            # If accepted, we can add the doctor's observations as a summary note but keep the AI factors
+           
             if db_validation.observations:
                 result["explanation"]["summary"] = f"Accepted & Verified by physician. Notes: {db_validation.observations}"
         
@@ -464,10 +463,10 @@ def get_patient_explanation(patient_id: int, disease: str = None, db: Session = 
     
     try:
         actual_features = feature_data.get("feature_vector", feature_data)
-        # Use the refactored predict_with_explanation with the disease parameter
+       
         result = ml_engine.predict_with_explanation(actual_features, target_disease=disease)
         
-        # Add patient context
+       
         db_patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
         result["patient_name"] = db_patient.name if db_patient else "Unknown"
         result["data_summary"] = feature_data.get("raw_data_summary", {})
@@ -583,6 +582,52 @@ def get_unread_count(db: Session = Depends(database.get_db)):
     ).count()
     return {"count": count}
 
+@app.get("/analytics/summary")
+def get_analytics_summary(db: Session = Depends(database.get_db)):
+    """Fetch aggregated data for dashboard charts."""
+    # 1. Total Patients
+    total_patients = db.query(models.Patient).count()
+    
+    # 2. Gender Distribution
+    gender_counts = db.query(models.Patient.gender, func.count(models.Patient.id)).group_by(models.Patient.gender).all()
+    gender_dist = [{"name": (g[0] or "Unknown"), "value": g[1]} for g in gender_counts]
+    
+    # 3. Age Distribution
+    age_groups = {
+        "0-20": 0,
+        "21-40": 0,
+        "41-60": 0,
+        "61+": 0
+    }
+    patients = db.query(models.Patient.age).all()
+    for p in patients:
+        age = p[0]
+        if age is None: continue
+        if age <= 20: age_groups["0-20"] += 1
+        elif age <= 40: age_groups["21-40"] += 1
+        elif age <= 60: age_groups["41-60"] += 1
+        else: age_groups["61+"] += 1
+    age_dist = [{"name": k, "value": v} for k, v in age_groups.items()]
+    
+    # 4. Disease Distribution (from ClinicalValidation)
+    disease_counts = db.query(models.ClinicalValidation.final_diagnosis, func.count(models.ClinicalValidation.id))\
+        .filter(models.ClinicalValidation.final_diagnosis != None)\
+        .group_by(models.ClinicalValidation.final_diagnosis).all()
+    disease_dist = [{"name": d[0], "count": d[1]} for d in disease_counts]
+    
+    # 5. Risk Level Distribution (from Notifications)
+    risk_counts = db.query(models.Notification.risk_level, func.count(models.Notification.id))\
+        .group_by(models.Notification.risk_level).all()
+    risk_dist = [{"name": r[0], "value": r[1]} for r in risk_counts]
+    
+    return {
+        "total_patients": total_patients,
+        "gender_dist": gender_dist,
+        "age_dist": age_dist,
+        "disease_dist": disease_dist,
+        "risk_dist": risk_dist
+    }
+
 @app.post("/patients/{patient_id}/validation", response_model=schemas.ClinicalValidation)
 def create_clinical_validation(
     patient_id: int, 
@@ -625,7 +670,7 @@ def get_finalized_diet(patient_id: int, regenerate: bool = False, preference: st
             ).order_by(models.ClinicalValidation.timestamp.desc()).first()
         
         if not db_validation:
-            # Fallback to AI generation
+            
             feature_data = ml_utils.get_patient_feature_vector(patient_id, db)
             if not feature_data:
                 raise HTTPException(status_code=404, detail=f"Patient ID {patient_id} not found")
@@ -721,8 +766,8 @@ def download_diet_pdf(patient_id: int, preference: str = "none", db: Session = D
 
         class PremiumDietPDF(FPDF):
             def header(self):
-                # Sleek Emerald Header for Diet
-                self.set_fill_color(5, 150, 105) # Emerald 600
+                
+                self.set_fill_color(5, 150, 105) 
                 self.rect(0, 0, 210, 35, 'F')
                 
                 self.set_y(10)
@@ -848,7 +893,7 @@ def download_diet_pdf(patient_id: int, preference: str = "none", db: Session = D
 
 @app.get("/patients/{patient_id}/download-health-report")
 def download_health_report(patient_id: int, request: Request, db: Session = Depends(database.get_db)):
-    """Generate and return a professional, medical-grade PDF of the Clinical Health Report following strict 11-section structure."""
+    
     import traceback
     import datetime
     import json
@@ -859,7 +904,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
     from fastapi.responses import FileResponse
 
     try:
-        # 1. Fetch Comprehensive Data
+        
         db_patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
         if not db_patient:
             raise HTTPException(status_code=404, detail="Patient Not Found")
@@ -874,7 +919,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         prediction = ml_engine.predict_with_explanation(actual_features)
         risk_result = risk_stratification.perform_risk_stratification(actual_features, prediction)
 
-        # Helper: Determine High/Low/Normal for Lab Results
+       
         def get_lab_status(val_str, range_str, is_abn):
             if not is_abn: return "Normal"
             if not val_str or not range_str: return "ABNORMAL"
@@ -899,7 +944,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         def safe_text(text):
             if not text: return ""
             if not isinstance(text, str): text = str(text)
-            # Remove symbols and handle unicode
+            
             text = text.replace('•', '-').replace('✓', 'v').replace('✅', 'v').replace('⚠️', '!').replace('👉', '>')
             text = text.replace('⭐', '*').replace('📈', '+').replace('🔍', '?').replace('🩸', 'o').replace('💊', '*')
             text = text.replace('🩺', '+').replace('🔬', '!').replace('🥗', '').replace('📅', '').replace('🚫', 'X')
@@ -909,7 +954,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         class ClinicalReportPDF(FPDF):
             def header(self):
                 if self.page_no() == 1:
-                    self.set_fill_color(15, 23, 42) # Professional Slate 900
+                    self.set_fill_color(15, 23, 42) 
                     self.rect(0, 0, 210, 30, 'F')
                     self.set_y(10)
                     self.set_text_color(255, 255, 255)
@@ -934,7 +979,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         pdf.add_page()
         pdf.set_auto_page_break(auto=True, margin=30)
         
-        # --- 1. PATIENT PROFILE ---
+       
         pdf.set_fill_color(241, 245, 249)
         pdf.set_font('helvetica', 'B', 11)
         pdf.cell(0, 8, " 1. PATIENT PROFILE", fill=True, new_x="LMARGIN", new_y="NEXT")
@@ -948,7 +993,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         pdf.cell(col_w, 7, safe_text(f"Date: {datetime.datetime.now().strftime('%Y-%m-%d')}"), new_x="LMARGIN", new_y="NEXT")
         pdf.ln(5)
 
-        # --- 2. VITAL SIGNS SUMMARY ---
+       
         bmi_val = "N/A"
         if db_patient.height and db_patient.weight and db_patient.height > 0:
             bmi_val = f"{(db_patient.weight / ((db_patient.height / 100) ** 2)):.1f}"
@@ -963,7 +1008,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         pdf.cell(col_w, 7, safe_text(f"BMI: {bmi_val}"), new_x="LMARGIN", new_y="NEXT")
         pdf.ln(4)
 
-        # --- 3. CLINICAL RISK STATUS ---
+        
         risk_level = risk_result.get("risk_level", "Low")
         risk_colors = {"Low": (16, 185, 129), "Medium": (245, 158, 11), "Moderate": (245, 158, 11), "High": (239, 68, 68), "Critical": (127, 29, 29)}
         r_color = risk_colors.get(risk_level, (100, 100, 100))
@@ -977,7 +1022,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         pdf.set_text_color(30, 41, 59)
         pdf.ln(2)
 
-        # --- 4. Predicted Disease ---
+       
         disease_name = prediction.get("disease", "Healthy").title()
         if db_validation and db_validation.final_diagnosis:
             disease_name = db_validation.final_diagnosis.title()
@@ -989,7 +1034,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         pdf.cell(0, 8, safe_text(f"Condition: {disease_name}"), new_x="LMARGIN", new_y="NEXT")
         pdf.ln(2)
 
-        # --- 5. CLINICAL INTERPRETATION ---
+       
         pdf.set_font('helvetica', 'B', 11)
         pdf.cell(0, 8, " 5. CLINICAL INTERPRETATION", fill=True, new_x="LMARGIN", new_y="NEXT")
         pdf.ln(2)
@@ -1007,7 +1052,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         pdf.multi_cell(0, 6, safe_text(interpretation))
         pdf.ln(4)
 
-        # --- 6. SYMPTOM ANALYSIS ---
+       
         pdf.set_font('helvetica', 'B', 11)
         pdf.cell(0, 8, " 6. SYMPTOM ANALYSIS", fill=True, new_x="LMARGIN", new_y="NEXT")
         pdf.ln(2)
@@ -1020,7 +1065,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
                 sym_text = sym.raw_text if sym.raw_text else "General Symptoms"
                 pdf.cell(0, 6, safe_text(f"- {sym_text} (Severity: {sym.severity}/10, Duration: {sym.duration})"), new_x="LMARGIN", new_y="NEXT")
         
-        # Also check other medical history which may contain symptoms
+        
         if db_patient.other_medical_history:
             has_symptoms = True
             pdf.set_font('helvetica', 'I', 10)
@@ -1031,7 +1076,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
             pdf.cell(0, 6, "No symptoms or medical history reported.", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(4)
 
-        # --- 7. LABORATORY RESULTS TABLE ---
+       
         pdf.set_font('helvetica', 'B', 11)
         pdf.cell(0, 8, " 7. LABORATORY RESULTS TABLE", fill=True, new_x="LMARGIN", new_y="NEXT")
         pdf.ln(2)
@@ -1045,14 +1090,14 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
             
             pdf.set_font('helvetica', '', 9)
             for lab in labs:
-                # SKIP mistakes/redundant findings
+                
                 if lab.test_name == "Clinical Finding":
                     continue
                 
-                # Fix BMI mistake (common OCR error to read it as 227 or similar if misaligned with ALT)
+                
                 val_str = str(lab.value)
                 
-                # Sanity check: Exclude obviously impossible laboratory values (e.g. phone numbers misread as labs)
+                
                 try:
                     num_val = float(val_str)
                     if num_val >= 1000000:
@@ -1062,8 +1107,8 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
 
                 if lab.test_name.lower() == 'bmi':
                     try:
-                        if float(val_str) > 50: # Humanly plausible BMI is < 50 usually, definitely < 200
-                            val_str = bmi_val # Use the calculated BMI from profile
+                        if float(val_str) > 50: 
+                            val_str = bmi_val 
                     except: pass
 
                 status = get_lab_status(val_str, lab.reference_range, lab.is_abnormal)
@@ -1081,7 +1126,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
             pdf.cell(0, 6, "No laboratory results available.", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(4)
 
-        # --- 8. KEY ABNORMAL FINDINGS ---
+       
         pdf.set_font('helvetica', 'B', 11)
         pdf.cell(0, 8, " 8. KEY ABNORMAL FINDINGS", fill=True, new_x="LMARGIN", new_y="NEXT")
         pdf.ln(2)
@@ -1095,7 +1140,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
                 pdf.cell(0, 6, safe_text(f"* {ab}"), new_x="LMARGIN", new_y="NEXT")
         pdf.ln(4)
 
-        # --- 9. POSSIBLE CAUSES / RISK FACTORS ---
+       
         pdf.set_font('helvetica', 'B', 11)
         pdf.cell(0, 8, " 9. POSSIBLE CAUSES / RISK FACTORS", fill=True, new_x="LMARGIN", new_y="NEXT")
         pdf.ln(2)
@@ -1111,7 +1156,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
             pdf.cell(0, 6, safe_text(f"- {rf}"), new_x="LMARGIN", new_y="NEXT")
         pdf.ln(4)
 
-        # --- 10. RECOMMENDATIONS ---
+       
         pdf.set_font('helvetica', 'B', 11)
         pdf.cell(0, 8, " 10. RECOMMENDATIONS", fill=True, new_x="LMARGIN", new_y="NEXT")
         pdf.ln(2)
@@ -1125,7 +1170,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
             pdf.ln(1)
         pdf.ln(4)
 
-        # --- 11. FOLLOW-UP ADVICE ---
+       
         pdf.set_font('helvetica', 'B', 11)
         pdf.cell(0, 8, " 11. FOLLOW-UP ADVICE", fill=True, new_x="LMARGIN", new_y="NEXT")
         pdf.ln(2)
@@ -1138,7 +1183,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         for a in advice:
             pdf.cell(0, 6, safe_text(f"* {a}"), new_x="LMARGIN", new_y="NEXT")
 
-        # Digital Signature / Final Trace
+        
         pdf.ln(10)
         if db_validation and db_validation.signature_path and os.path.exists(db_validation.signature_path):
             pdf.image(db_validation.signature_path, x=150, w=30)
@@ -1151,7 +1196,7 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
         pdf.set_font('helvetica', 'I', 8)
         pdf.cell(60, 5, f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}", align='R')
 
-        # Save and return
+        
         file_name = f"health_report_{patient_id}_{uuid.uuid4().hex}.pdf"
         file_path = os.path.join(DIET_UPLOAD_DIR, file_name)
         pdf.output(file_path)

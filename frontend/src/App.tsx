@@ -1,3 +1,4 @@
+import { API_BASE } from './config';
 import React, { useState, useEffect } from 'react';
 import Login from './components/Login';
 import RegistrationForm from './components/RegistrationForm';
@@ -11,6 +12,7 @@ import DietRecommendationView from './components/DietRecommendationView';
 import DoctorReviewCenter from './components/DoctorReviewCenter';
 import DietReviewCenter from './components/DietReviewCenter';
 import HealthReportView from './components/HealthReportView';
+import HealthAnalysis from './components/HealthAnalysis';
 
 interface Notification {
     id: number;
@@ -22,7 +24,7 @@ interface Notification {
     created_at: string;
 }
 
-type ViewType = 'register' | 'list' | 'admin' | 'symptom' | 'lab' | 'predict' | 'diet' | 'dietReview' | 'review' | 'healthReport';
+type ViewType = 'register' | 'list' | 'admin' | 'symptom' | 'lab' | 'predict' | 'diet' | 'dietReview' | 'review' | 'healthReport' | 'analysis';
 
 interface NavItem {
     id: ViewType;
@@ -85,6 +87,11 @@ const Icons = {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
     ),
+    analysis: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+    ),
 };
 
 const navItems: NavItem[] = [
@@ -97,12 +104,13 @@ const navItems: NavItem[] = [
     { id: 'diet', label: 'Diet Plan', icon: Icons.diet },
     { id: 'dietReview', label: 'Diet Review', icon: Icons.dietReview, staffOnly: true },
     { id: 'review', label: 'Review Center', icon: Icons.review, staffOnly: true },
+    { id: 'analysis', label: 'Analysis', icon: Icons.analysis, staffOnly: true },
     { id: 'admin', label: 'Staff', icon: Icons.admin, adminOnly: true },
 ];
 
 const getNavItemsForRole = (role: string | null) => {
     if (role === 'doctor') {
-        const doctorAllowedIds = ['list', 'predict', 'healthReport', 'dietReview', 'review'];
+        const doctorAllowedIds = ['list', 'predict', 'healthReport', 'dietReview', 'review', 'analysis'];
         return navItems.filter(item => doctorAllowedIds.includes(item.id));
     }
     if (role === 'admin') {
@@ -143,7 +151,7 @@ function App() {
 
     const fetchPatients = async () => {
         try {
-            const res = await fetch('http://127.0.0.1:8000/patients/');
+            const res = await fetch('${API_BASE}/patients/');
             if (res.ok) setPatients(await res.json());
         } catch { }
     };
@@ -154,7 +162,7 @@ function App() {
 
     const fetchNotifications = async () => {
         try {
-            const res = await fetch('http://127.0.0.1:8000/notifications');
+            const res = await fetch('${API_BASE}/notifications');
             if (res.ok) {
                 const data = await res.json();
                 setNotifications(data);
@@ -173,14 +181,14 @@ function App() {
 
     const markAsRead = async (id: number) => {
         try {
-            await fetch(`http://127.0.0.1:8000/notifications/${id}/read`, { method: 'PUT' });
+            await fetch(`${API_BASE}/notifications/${id}/read`, { method: 'PUT' });
             fetchNotifications();
         } catch { }
     };
 
     const deleteNotification = async (id: number) => {
         try {
-            await fetch(`http://127.0.0.1:8000/notifications/${id}`, { method: 'DELETE' });
+            await fetch(`${API_BASE}/notifications/${id}`, { method: 'DELETE' });
             fetchNotifications();
         } catch { }
     };
@@ -245,7 +253,7 @@ function App() {
         navigateTo('predict');
         try {
             console.log(`Running analysis for patient ID: ${selectedPatientId}`);
-            const res = await fetch(`http://127.0.0.1:8000/patients/${selectedPatientId}/predict`, { method: 'POST' });
+            const res = await fetch(`${API_BASE}/patients/${selectedPatientId}/predict`, { method: 'POST' });
             if (res.ok) {
                 const data = await res.json();
                 console.log("Analysis successful!");
@@ -275,6 +283,7 @@ function App() {
                 case 'dietReview': return <DietReviewCenter />;
                 case 'predict': return <PredictionView initialPatientId={selectedPatientId} userRole={role} result={result} loading={loading} error={error} />;
                 case 'healthReport': return <HealthReportView />;
+                case 'analysis': return <HealthAnalysis />;
                 default: return <DoctorReviewCenter />;
             }
         }
@@ -286,6 +295,7 @@ function App() {
             case 'lab': return <LabEntry />;
             case 'predict': return <PredictionView initialPatientId={selectedPatientId} userRole={role} result={result} loading={loading} error={error} />;
             case 'healthReport': return <HealthReportView />;
+            case 'analysis': return <HealthAnalysis />;
             case 'diet': return <DietRecommendationView />;
             case 'admin': return role === 'admin' ? <StaffRegistration /> : <div>Access Denied</div>;
             default: return <RegistrationForm />;
@@ -560,3 +570,4 @@ function App() {
 }
 
 export default App;
+
