@@ -11,12 +11,8 @@ import os
 import json
 from sqlalchemy import func
 
-# Robust path detection for local vs. Docker
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-if os.path.exists(os.path.join(CURRENT_DIR, "uploads")):
-    BACKEND_DIR = CURRENT_DIR
-else:
-    BACKEND_DIR = os.path.join(os.path.dirname(CURRENT_DIR), "backend")
+# Simplified path detection
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 
 UPLOAD_DIR = os.path.join(BACKEND_DIR, "uploads", "lab_reports")
 DIET_UPLOAD_DIR = os.path.join(BACKEND_DIR, "uploads", "diets")
