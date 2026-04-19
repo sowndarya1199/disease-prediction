@@ -290,7 +290,7 @@ const SymptomEntry: React.FC = () => {
     const handleDelete = async (id: number) => {
         if (!confirm('Are you sure you want to delete this record?')) return;
         try {
-            const response = await fetch(`http://localhost:8000/symptoms/${id}`, {
+            const response = await fetch(`${API_BASE}/symptoms/${id}`, {
                 method: 'DELETE',
             });
             if (response.ok) {
