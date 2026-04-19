@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Form, Request
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from . import models, schemas, database, auth, ml_utils, ml_engine, lab_ocr, risk_stratification, diet_recommendation, symptom_categories
+import models, schemas, database, auth, ml_utils, ml_engine, lab_ocr, risk_stratification, diet_recommendation, symptom_categories
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
