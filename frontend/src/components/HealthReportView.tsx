@@ -11,7 +11,7 @@ const HealthReportView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('${API_BASE}/patients/')
+        fetch(`${API_BASE}/patients/`)
             .then(r => r.ok ? r.json() : [])
             .then((data: Patient[]) => {
                 const verifiedPatients = data.filter(p => p.approval_status === 'Approved' || p.approval_status === 'Modified');

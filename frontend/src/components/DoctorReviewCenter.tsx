@@ -26,7 +26,7 @@ const DoctorReviewCenter: React.FC<DoctorReviewCenterProps> = ({ initialPatientI
 
     const fetchPendingQueue = async () => {
         try {
-            const res = await fetch('${API_BASE}/patients/');
+            const res = await fetch(`${API_BASE}/patients/`);
             if (res.ok) {
                 const allPatients = await res.json();
                 const pending = allPatients.filter((p: any) =>

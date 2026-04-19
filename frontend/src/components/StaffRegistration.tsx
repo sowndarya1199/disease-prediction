@@ -49,7 +49,7 @@ const StaffRegistration: React.FC = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('${API_BASE}/register', {
+            const response = await fetch(`${API_BASE}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, role }),

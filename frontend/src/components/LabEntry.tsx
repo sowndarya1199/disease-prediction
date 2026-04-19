@@ -28,7 +28,7 @@ const LabEntry: React.FC = () => {
     useEffect(() => {
         const fetchPatients = async () => {
             try {
-                const response = await fetch('${API_BASE}/patients/');
+                const response = await fetch(`${API_BASE}/patients/`);
                 if (response.ok) {
                     const data = await response.json();
                     setPatients(data);
@@ -75,7 +75,7 @@ const LabEntry: React.FC = () => {
         formData.append('patient_id', selectedPatientId.toString());
 
         try {
-            const response = await fetch('${API_BASE}/labs/upload', {
+            const response = await fetch(`${API_BASE}/labs/upload`, {
                 method: 'POST',
                 body: formData,
             });
@@ -172,7 +172,7 @@ const LabEntry: React.FC = () => {
         if (!window.confirm(`🗑️ Are you sure you want to delete ${selectedIds.length} items?`)) return;
 
         try {
-            const response = await fetch('${API_BASE}/labs/delete-batch', {
+            const response = await fetch(`${API_BASE}/labs/delete-batch`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(selectedIds)

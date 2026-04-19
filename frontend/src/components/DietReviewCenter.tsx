@@ -22,7 +22,7 @@ const DietReviewCenter: React.FC<DietReviewCenterProps> = ({ initialPatientId })
 
     const fetchPatients = async () => {
         try {
-            const res = await fetch('${API_BASE}/patients/');
+            const res = await fetch(`${API_BASE}/patients/`);
             if (res.ok) {
                 const allPatients = await res.json();
                 // Show patients who have a diagnostic status (Approved/Modified) as they likely need a diet plan

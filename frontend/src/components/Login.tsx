@@ -97,7 +97,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
         try {
             if (mode === 'register') {
-                const registerResponse = await fetch('${API_BASE}/register', {
+                const registerResponse = await fetch(`${API_BASE}/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, role: selectedRole }),
@@ -113,7 +113,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             formData.append('username', username);
             formData.append('password', password);
 
-            const response = await fetch('${API_BASE}/token', {
+            const response = await fetch(`${API_BASE}/token`, {
                 method: 'POST',
                 body: formData,
             });

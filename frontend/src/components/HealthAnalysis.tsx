@@ -15,7 +15,7 @@ const HealthAnalysis: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('${API_BASE}/analytics/summary');
+                const response = await fetch(`${API_BASE}/analytics/summary`);
                 if (response.ok) {
                     const result = await response.json();
                     setData(result);

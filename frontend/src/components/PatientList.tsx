@@ -35,7 +35,7 @@ const PatientList: React.FC<PatientListProps> = ({ onNavigateToPrediction }) => 
 
     const fetchPatients = async () => {
         try {
-            const response = await fetch('${API_BASE}/patients/');
+            const response = await fetch(`${API_BASE}/patients/`);
             if (response.ok) {
                 const data = await response.json();
                 setPatients(data);

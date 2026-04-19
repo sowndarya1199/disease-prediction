@@ -151,7 +151,7 @@ function App() {
 
     const fetchPatients = async () => {
         try {
-            const res = await fetch('${API_BASE}/patients/');
+            const res = await fetch(`${API_BASE}/patients/`);
             if (res.ok) setPatients(await res.json());
         } catch { }
     };
@@ -162,7 +162,7 @@ function App() {
 
     const fetchNotifications = async () => {
         try {
-            const res = await fetch('${API_BASE}/notifications');
+            const res = await fetch(`${API_BASE}/notifications`);
             if (res.ok) {
                 const data = await res.json();
                 setNotifications(data);

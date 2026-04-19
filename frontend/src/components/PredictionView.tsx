@@ -310,7 +310,7 @@ const PredictionView: React.FC<PredictionViewProps> = ({ initialPatientId, userR
         formData.append('file', file);
 
         try {
-            const res = await fetch('${API_BASE}/signatures/upload', {
+            const res = await fetch(`${API_BASE}/signatures/upload`, {
                 method: 'POST',
                 body: formData
             });
