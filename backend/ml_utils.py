@@ -1,7 +1,7 @@
 
 
 from sqlalchemy.orm import Session
-from . import models
+import models
 import json
 
 def safe_float(v, default=0.0):

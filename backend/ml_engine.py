@@ -1,8 +1,8 @@
 
 
-from .xai_module import ExplanationTracker, generate_prediction_explanation
-from .ml_models import predict_with_ml_ensemble, DISEASE_CLASSES
-from .disease_symptoms import match_symptoms_to_disease
+from xai_module import ExplanationTracker, generate_prediction_explanation
+from ml_models import predict_with_ml_ensemble, DISEASE_CLASSES
+from disease_symptoms import match_symptoms_to_disease
 
 
 DISEASE_CATEGORIES = {
