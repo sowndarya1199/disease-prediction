@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../config';
 
 interface FormData {
     [key: string]: string | number | boolean | '';
@@ -195,7 +196,7 @@ const RegistrationForm: React.FC = () => {
         setMessage(null);
 
         try {
-            const response = await fetch('http://localhost:8000/patients/', {
+            const response = await fetch(`${API_BASE}/patients/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),

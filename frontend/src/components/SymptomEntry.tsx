@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE } from '../config';
 
 interface Patient {
     id: number;
@@ -71,7 +72,7 @@ const SymptomEntry: React.FC = () => {
     useEffect(() => {
         const fetchPatients = async () => {
             try {
-                const response = await fetch('http://localhost:8000/patients/');
+                const response = await fetch(`${API_BASE}/patients/`);
                 if (response.ok) {
                     const data = await response.json();
                     setPatients(data);
@@ -88,8 +89,8 @@ const SymptomEntry: React.FC = () => {
         const fetchSymptomData = async () => {
             try {
                 const [categoriesRes, commonRes] = await Promise.all([
-                    fetch('http://localhost:8000/symptoms/categories'),
-                    fetch('http://localhost:8000/symptoms/common')
+                    fetch(`${API_BASE}/symptoms/categories`),
+                    fetch(`${API_BASE}/symptoms/common`)
                 ]);
 
                 if (categoriesRes.ok) {
@@ -116,7 +117,7 @@ const SymptomEntry: React.FC = () => {
                 return;
             }
             try {
-                const response = await fetch(`http://localhost:8000/symptoms/${selectedPatientId}`);
+                const response = await fetch(`${API_BASE}/symptoms/${selectedPatientId}`);
                 if (response.ok) {
                     const data = await response.json();
                     setSymptomHistory(data);
@@ -138,7 +139,7 @@ const SymptomEntry: React.FC = () => {
             }
 
             try {
-                const response = await fetch(`http://localhost:8000/symptoms/search?q=${encodeURIComponent(searchQuery)}&limit=10`);
+                const response = await fetch(`${API_BASE}/symptoms/search?q=${encodeURIComponent(searchQuery)}&limit=10`);
                 if (response.ok) {
                     const data = await response.json();
                     setSearchResults(data.results);
@@ -206,7 +207,7 @@ const SymptomEntry: React.FC = () => {
         }, 150);
 
         try {
-            const response = await fetch('http://localhost:8000/symptoms/process', {
+            const response = await fetch(`${API_BASE}/symptoms/process`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ symptoms: selectedSymptoms }),
@@ -250,7 +251,7 @@ const SymptomEntry: React.FC = () => {
         setMessage(null);
 
         try {
-            const response = await fetch('http://localhost:8000/symptoms/', {
+            const response = await fetch(`${API_BASE}/symptoms/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -271,7 +272,7 @@ const SymptomEntry: React.FC = () => {
                     setAnalyzed(false);
                     setAnalysisProgress(0);
 
-                    fetch(`http://localhost:8000/symptoms/${selectedPatientId}`)
+                    fetch(`${API_BASE}/symptoms/${selectedPatientId}`)
                         .then(res => res.json())
                         .then(data => setSymptomHistory(data))
                         .catch(console.error);
