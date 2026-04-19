@@ -1192,8 +1192,15 @@ def download_health_report(patient_id: int, request: Request, db: Session = Depe
 
         
         pdf.ln(10)
-        if db_validation and db_validation.signature_path and os.path.exists(db_validation.signature_path):
-            pdf.image(db_validation.signature_path, x=150, w=30)
+        # Robust Signature Loading
+        if db_validation and db_validation.signature_path:
+            sig_p = db_validation.signature_path
+            # If stored path doesn't exist (e.g. moved from Local to Cloud), try current SIGNATURE_DIR
+            if not os.path.exists(sig_p):
+                sig_p = os.path.join(SIGNATURE_DIR, os.path.basename(sig_p))
+            
+            if os.path.exists(sig_p):
+                pdf.image(sig_p, x=150, w=30)
         
         pdf.set_x(140)
         pdf.set_font('helvetica', 'B', 9)
