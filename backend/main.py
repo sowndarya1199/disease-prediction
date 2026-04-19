@@ -435,7 +435,7 @@ def predict_patient_disease(patient_id: int, db: Session = Depends(database.get_
     
     result["patient_name"] = db_patient.name if db_patient else "Unknown"
     result["data_summary"] = feature_data.get("raw_data_summary", {})
-    result["lab_report_url"] = f"http://localhost:8000{db_patient.lab_report_path}" if db_patient and db_patient.lab_report_path else None
+    result["lab_report_url"] = db_patient.lab_report_path if db_patient and db_patient.lab_report_path else None
     
     
     risk_result = risk_stratification.perform_risk_stratification(
