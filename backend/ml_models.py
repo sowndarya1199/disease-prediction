@@ -9,8 +9,14 @@ import os
 import json
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-MODEL_DIR = os.path.join(BASE_DIR, "backend", "data")
+# Robust path detection for local vs. Docker
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# If we are in the 'backend' folder, the data is right here. 
+# If we were in the root, it would be in 'backend/data'.
+if os.path.exists(os.path.join(BASE_DIR, "data")):
+    MODEL_DIR = os.path.join(BASE_DIR, "data")
+else:
+    MODEL_DIR = os.path.join(os.path.dirname(BASE_DIR), "backend", "data")
 RANDOM_FOREST_MODEL_PATH = os.path.join(MODEL_DIR, "medpred_rf_model.pkl")
 LABEL_ENCODER_PATH = os.path.join(MODEL_DIR, "label_encoder.pkl")
 

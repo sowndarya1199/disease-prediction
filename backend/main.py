@@ -11,12 +11,19 @@ import os
 import json
 from sqlalchemy import func
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-UPLOAD_DIR = os.path.join(BASE_DIR, "backend", "uploads", "lab_reports")
-DIET_UPLOAD_DIR = os.path.join(BASE_DIR, "backend", "uploads", "diets")
+# Robust path detection for local vs. Docker
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+if os.path.exists(os.path.join(CURRENT_DIR, "uploads")):
+    BACKEND_DIR = CURRENT_DIR
+else:
+    BACKEND_DIR = os.path.join(os.path.dirname(CURRENT_DIR), "backend")
+
+UPLOAD_DIR = os.path.join(BACKEND_DIR, "uploads", "lab_reports")
+DIET_UPLOAD_DIR = os.path.join(BACKEND_DIR, "uploads", "diets")
+SIGNATURE_DIR = os.path.join(BACKEND_DIR, "uploads", "signatures")
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(DIET_UPLOAD_DIR, exist_ok=True)
-SIGNATURE_DIR = os.path.join(BASE_DIR, "backend", "uploads", "signatures")
 os.makedirs(SIGNATURE_DIR, exist_ok=True)
 
 
